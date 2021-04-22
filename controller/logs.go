@@ -57,7 +57,7 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(
 			w, http.StatusInternalServerError,
 			Response{
-				Message: "Internal server error",
+				Message: err.Error(),
 				Status:  http.StatusInternalServerError,
 			},
 		)
