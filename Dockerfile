@@ -1,5 +1,5 @@
 # golang alpine 1.16.3
-FROM golang:1.16.6-alpine as builder
+FROM golang:1.16.3-alpine as builder
 
 ARG commit
 ARG version
@@ -11,7 +11,7 @@ ENV version=$version
 RUN apk update && apk add --no-cache ca-certificates && update-ca-certificates
 
 # Create user.
-RUN addgroup -S c && adduser -S numeral -G axiom
+RUN addgroup -S axiom && adduser -S numeral -G axiom
 
 WORKDIR $GOPATH/src/github.com/javiertlopez/numeral/
 COPY . .
