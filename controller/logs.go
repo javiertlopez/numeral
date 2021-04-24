@@ -11,6 +11,19 @@ import (
 
 // Create controller
 func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
+	device := r.Header.Get("x-device-id")
+	if len(device) == 0 {
+		JSONResponse(
+			w, http.StatusBadRequest,
+			Response{
+				Message: "x-device-id missing",
+				Status:  http.StatusBadRequest,
+			},
+		)
+
+		return
+	}
+
 	file, handler, err := r.FormFile("name")
 	if err != nil {
 		JSONResponse(
@@ -20,8 +33,29 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 				Status:  http.StatusBadRequest,
 			},
 		)
+
+		return
 	}
 	defer file.Close()
+
+	response, err := c.repository.CreateLog(
+		r.Context(),
+		numeral.Log{
+			DeviceID: device,
+			ImageKey: handler.Filename,
+		},
+	)
+	if err != nil {
+		JSONResponse(
+			w, http.StatusBadRequest,
+			Response{
+				Message: err.Error(),
+				Status:  http.StatusBadRequest,
+			},
+		)
+
+		return
+	}
 
 	buf := new(bytes.Buffer)
 	_, err = buf.ReadFrom(file)
@@ -36,11 +70,11 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 	}
 
 	image := numeral.Image{
-		KeyID:  handler.Filename,
+		KeyID:  response.ID,
 		Binary: buf.Bytes(),
 	}
 
-	response, err := c.storage.PutImage(r.Context(), image)
+	object, err := c.storage.PutImage(r.Context(), image)
 	if err != nil {
 		// Look for Custom Error
 		if err == errorcodes.ErrUnprocessable {
@@ -68,6 +102,6 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(
 		w,
 		http.StatusCreated,
-		fmt.Sprintf("key: %s, file: %s", response.KeyID, handler.Filename),
+		fmt.Sprintf("key: %s, file: %s", object.KeyID, handler.Filename),
 	)
 }
