@@ -9,4 +9,5 @@ import (
 // setupLogController setup the router with the log controller
 func setupLogController(router *mux.Router, cont controller.Controller) {
 	router.HandleFunc("/logs", cont.CreateLog).Methods("POST")
+	router.HandleFunc("/logs/{id}", cont.UpdateLog).Methods("PATCH")
 }

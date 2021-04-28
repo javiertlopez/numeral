@@ -15,4 +15,6 @@ type Log struct {
 // Repository interface
 type Repository interface {
 	CreateLog(ctx context.Context, countLog Log) (Log, error)
+	GetByID(ctx context.Context, id string) (Log, error)
+	UpdateLog(ctx context.Context, countLog Log) (Log, error)
 }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -103,5 +104,53 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 		w,
 		http.StatusCreated,
 		fmt.Sprintf("key: %s, file: %s", object.KeyID, handler.Filename),
+	)
+}
+
+// UpdateLog controller
+func (c *controller) UpdateLog(w http.ResponseWriter, r *http.Request) {
+	var log numeral.Log
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&log); err != nil {
+		JSONResponse(
+			w, http.StatusBadRequest,
+			Response{
+				Message: err.Error(),
+				Status:  http.StatusBadRequest,
+			},
+		)
+		return
+	}
+	defer r.Body.Close()
+
+	response, err := c.repository.UpdateLog(r.Context(), log)
+	if err != nil {
+		// Look for Custom Error
+		if err == errorcodes.ErrUnprocessable {
+			JSONResponse(
+				w, http.StatusUnprocessableEntity,
+				Response{
+					Message: "Unprocessable entity",
+					Status:  http.StatusUnprocessableEntity,
+				},
+			)
+			return
+		}
+
+		JSONResponse(
+			w, http.StatusInternalServerError,
+			Response{
+				Message: err.Error(),
+				Status:  http.StatusInternalServerError,
+			},
+		)
+
+		return
+	}
+
+	JSONResponse(
+		w,
+		http.StatusCreated,
+		response,
 	)
 }
