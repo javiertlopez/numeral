@@ -13,6 +13,11 @@ const (
 	idleTimeout  = 60 * time.Second
 )
 
+var (
+	commit  string
+	version string
+)
+
 func main() {
 	// Environment variables
 	addr := os.Getenv("ADDR")
@@ -20,7 +25,9 @@ func main() {
 
 	application := New(
 		AppConfig{
-			MongoURI: mongoString,
+			commit:   commit,
+			version:  version,
+			mongoURI: mongoString,
 		},
 	)
 

@@ -13,6 +13,7 @@ func New(
 	router := mux.NewRouter()
 
 	setupLogController(router, app)
+	setupAppController(router, app)
 
 	return router
 }

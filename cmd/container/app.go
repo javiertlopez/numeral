@@ -28,15 +28,15 @@ type App struct {
 
 // AppConfig struct with configuration variables
 type AppConfig struct {
-	Commit   string
-	Version  string
-	MongoURI string
+	commit   string
+	version  string
+	mongoURI string
 }
 
 // New returns an App
 func New(cfg AppConfig) App {
 	// Set client options
-	clientOptions := options.Client().ApplyURI(cfg.MongoURI)
+	clientOptions := options.Client().ApplyURI(cfg.mongoURI)
 
 	// Context with timeout for establish connection with Mongo Atlas
 	ctx, cancel := context.WithTimeout(context.Background(), mongoTimeout)
@@ -61,7 +61,7 @@ func New(cfg AppConfig) App {
 
 	storage := cloud.New("picasso-numeral", s3Client)
 
-	controller := controller.New(repository, storage)
+	controller := controller.New(cfg.commit, cfg.version, repository, storage)
 
 	router := router.New(controller)
 
