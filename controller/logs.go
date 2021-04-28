@@ -8,6 +8,8 @@ import (
 
 	"github.com/javiertlopez/numeral"
 	"github.com/javiertlopez/numeral/errorcodes"
+
+	"github.com/gorilla/mux"
 )
 
 // Create controller
@@ -109,6 +111,9 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 
 // UpdateLog controller
 func (c *controller) UpdateLog(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
 	var log numeral.Log
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&log); err != nil {
@@ -123,7 +128,7 @@ func (c *controller) UpdateLog(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	response, err := c.repository.UpdateLog(r.Context(), log)
+	response, err := c.repository.UpdateLog(r.Context(), id, log)
 	if err != nil {
 		// Look for Custom Error
 		if err == errorcodes.ErrUnprocessable {

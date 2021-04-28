@@ -69,26 +69,37 @@ func (r *repository) GetByID(ctx context.Context, id string) (numeral.Log, error
 	return response.toModel(), nil
 }
 
-func (r *repository) UpdateLog(ctx context.Context, countLog numeral.Log) (numeral.Log, error) {
+func (r *repository) UpdateLog(ctx context.Context, id string, countLog numeral.Log) (numeral.Log, error) {
 	collection := r.mongo.Collection(Collection)
 	time := time.Now()
 
-	update := &log{
-		Count:     countLog.Count,
-		UpdatedAt: time,
+	var insert log
+
+	filter := bson.M{"_id": id}
+
+	err := collection.FindOne(ctx, filter).Decode(&insert)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return numeral.Log{}, fmt.Errorf("not found")
+		}
+
+		return numeral.Log{}, err
 	}
 
-	_, err := collection.UpdateByID(ctx, countLog.ID, update)
+	insert.UpdatedAt = time
+	insert.Count = countLog.Count
+
+	update := bson.M{
+		"$set": insert,
+	}
+
+	_, err = collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return numeral.Log{}, err
 	}
 
-	response, err := r.GetByID(ctx, countLog.ID)
-	if err != nil {
-		return numeral.Log{}, err
-	}
-
-	return response, nil
+	return insert.toModel(), nil
 }
 
 func (l log) toModel() numeral.Log {
@@ -98,6 +109,7 @@ func (l log) toModel() numeral.Log {
 		ImageKey:  l.ImageKey,
 		DeviceID:  l.DeviceID,
 		ShapeID:   l.ShapeID,
-		Timestamp: l.CreatedAt.UTC().Unix(),
+		CreatedAt: l.CreatedAt.UTC().String(),
+		UpdatedAt: l.UpdatedAt.UTC().String(),
 	}
 }
