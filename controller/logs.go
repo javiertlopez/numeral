@@ -26,7 +26,7 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, handler, err := r.FormFile("name")
+	file, handler, err := r.FormFile("filename")
 	if err != nil {
 		JSONResponse(
 			w, http.StatusUnprocessableEntity,
