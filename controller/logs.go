@@ -29,10 +29,10 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 	file, handler, err := r.FormFile("name")
 	if err != nil {
 		JSONResponse(
-			w, http.StatusBadRequest,
+			w, http.StatusUnprocessableEntity,
 			Response{
 				Message: err.Error(),
-				Status:  http.StatusBadRequest,
+				Status:  http.StatusUnprocessableEntity,
 			},
 		)
 
