@@ -3,7 +3,6 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/javiertlopez/numeral"
@@ -77,7 +76,7 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 		Binary: buf.Bytes(),
 	}
 
-	object, err := c.storage.PutImage(r.Context(), image)
+	_, err = c.storage.PutImage(r.Context(), image)
 	if err != nil {
 		// Look for Custom Error
 		if err == errorcodes.ErrUnprocessable {
@@ -105,7 +104,7 @@ func (c *controller) CreateLog(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(
 		w,
 		http.StatusCreated,
-		fmt.Sprintf("key: %s, file: %s", object.KeyID, handler.Filename),
+		response,
 	)
 }
 
